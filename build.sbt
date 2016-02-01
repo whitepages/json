@@ -8,7 +8,7 @@ scalaVersion := "2.11.7"
 
 scalacOptions ++= Seq("-deprecation", "-unchecked")
 
-viewSettings
+//viewSettings
 
 libraryDependencies ++= Seq(
         "org.scala-lang" % "scala-reflect" % scalaVersion.value,
