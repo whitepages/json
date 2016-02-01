@@ -12,7 +12,7 @@ scalacOptions ++= Seq("-deprecation", "-unchecked")
 
 libraryDependencies ++= Seq(
         "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-        "com.chuusai" %% "shapeless" % "2.1.0",
+        "com.chuusai" %% "shapeless" % "2.2.5",
         "org.scalatest" %% "scalatest" % "2.2.4" % "test",
         "org.specs2" %% "specs2-core" % "3.6.2" % "test",
         "junit" % "junit" % "4.12" % "test"
