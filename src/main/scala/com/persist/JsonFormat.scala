@@ -221,8 +221,18 @@ package object json {
       def read(json: Json): Map[String, V] = castOrThrow(json).mapValues(implicitly[ReadCodec[V]].read(_))
     }
 
+    implicit def simpleCollectionMap[V: ReadCodec] = new ReadCodec[scala.collection.Map[String, V]] {
+      def read(json: Json): scala.collection.Map[String, V] = castOrThrow(json).mapValues(implicitly[ReadCodec[V]].read(_))
+    }
+
     implicit def complexMap[K: ReadCodec, V: ReadCodec] = new ReadCodec[Map[K, V]] {
       def read(json: Json): Map[K, V] = castOrThrow(json).map { case (key, value) =>
+        (implicitly[ReadCodec[K]].read(Json(key)), implicitly[ReadCodec[V]].read(value))
+      }
+    }
+
+    implicit def complexCollectionMap[K: ReadCodec, V: ReadCodec] = new ReadCodec[scala.collection.Map[K, V]] {
+      def read(json: Json): scala.collection.Map[K, V] = castOrThrow(json).map { case (key, value) =>
         (implicitly[ReadCodec[K]].read(Json(key)), implicitly[ReadCodec[V]].read(value))
       }
     }
