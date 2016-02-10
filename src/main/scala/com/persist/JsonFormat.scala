@@ -203,6 +203,10 @@ package object json {
       def read(json: Json): Set[T] = extractSeq[T](json).toSet
     }
 
+    implicit def setCollection[T: ReadCodec] = new ReadCodec[scala.collection.Set[T]] {
+      def read(json: Json): scala.collection.Set[T] = extractSeq[T](json).toSet
+    }
+
     implicit def list[T: ReadCodec] = new ReadCodec[List[T]] {
       def read(json: Json): List[T] = extractSeq[T](json).toList
     }
@@ -222,7 +226,7 @@ package object json {
     }
 
     implicit def simpleCollectionMap[V: ReadCodec] = new ReadCodec[scala.collection.Map[String, V]] {
-      def read(json: Json): scala.collection.Map[String, V] = castOrThrow(json).mapValues(implicitly[ReadCodec[V]].read(_))
+      def read(json: Json): scala.collection.Map[String, V] = castOrThrow(json).mapValues(implicitly[ReadCodec[V]].read)
     }
 
     implicit def complexMap[K: ReadCodec, V: ReadCodec] = new ReadCodec[Map[K, V]] {
@@ -337,6 +341,15 @@ package object json {
     implicit def iterable[V: WriteCodec] = new WriteCodec[Iterable[V]] {
       def write(obj: Iterable[V]): JsonArray = obj.map(toJson(_)).toSeq
     }
+
+    implicit def set[V: WriteCodec] = new WriteCodec[Set[V]] {
+      def write(obj: Set[V]): JsonArray = obj.map(toJson(_)).toSeq
+    }
+
+    implicit def setCollection[V: WriteCodec] = new WriteCodec[scala.collection.Set[V]] {
+      def write(obj: scala.collection.Set[V]): JsonArray = obj.map(toJson(_)).toSeq
+    }
+
     implicit def seq[V: WriteCodec] = new WriteCodec[Seq[V]] {
       def write(obj: Seq[V]): JsonArray = obj.map(toJson(_))
     }
@@ -347,7 +360,7 @@ package object json {
       def write(obj: Array[V]): Json = obj.map(toJson(_)).toSeq
     }
 
-        implicit val byteBuffer = new WriteCodec[ByteBuffer] {
+    implicit val byteBuffer = new WriteCodec[ByteBuffer] {
       def write(obj: ByteBuffer): String = obj.array().slice(obj.position(),obj.limit()).map(_.toChar).mkString
     }
 
