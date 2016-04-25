@@ -2,7 +2,7 @@ name := "persist-json"
 
 organization := "com.persist"
 
-version := "1.2.0-SNAPSHOT"
+version := "1.2.0-WP"
 
 scalaVersion := "2.11.7"
 
