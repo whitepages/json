@@ -253,7 +253,7 @@ package object json {
       }
     }
 
-    implicit def deriveHNil: ReadCodec[HNil] =
+    /*implicit def deriveHNil: ReadCodec[HNil] =
       new ReadCodec[HNil] {
         // This will silently accept extra fields within a JsonObject
         // To change this behavior make sure json is a JsonObject and that it is empty
@@ -300,7 +300,7 @@ package object json {
     implicit def deriveInstance[F, G]
     (implicit gen: LabelledGeneric.Aux[F, G], sg: Lazy[ReadCodec[G]]): ReadCodec[F] = new ReadCodec[F] {
         def read(json: Json): F = gen.from(sg.value.read(json))
-      }
+      }*/
   }
 
   @implicitNotFound(msg = "Cannot find WriteCodec for ${T}")
@@ -327,12 +327,15 @@ package object json {
     implicit def simpleMap[V: WriteCodec] = new WriteCodec[scala.collection.Map[String, V]] {
       def write(obj: scala.collection.Map[String, V]): JsonObject = obj.mapValues(toJson(_)).toMap
     }
+
     implicit def simpleImmutableMap[V: WriteCodec] = new WriteCodec[Map[String, V]] {
       def write(obj: Map[String, V]): JsonObject = obj.mapValues(toJson(_)).toMap
     }
+
     implicit val jsonObject = new WriteCodec[JsonObject] {
       def write(obj: JsonObject): JsonObject = obj
     }
+
     implicit def complexMap[K: WriteCodec, V: WriteCodec] = new WriteCodec[scala.collection.Map[K,V]] {
       def write(obj: scala.collection.Map[K, V]) = obj.map { case (key, value) =>
         (Compact(implicitly[WriteCodec[K]].write(key)), implicitly[WriteCodec[V]].write(value))
