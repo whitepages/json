@@ -203,6 +203,10 @@ package object json {
       def read(json: Json): Set[T] = extractSeq[T](json).toSet
     }
 
+    implicit def setCollection[T: ReadCodec] = new ReadCodec[scala.collection.Set[T]] {
+      def read(json: Json): scala.collection.Set[T] = extractSeq[T](json).toSet
+    }
+
     implicit def list[T: ReadCodec] = new ReadCodec[List[T]] {
       def read(json: Json): List[T] = extractSeq[T](json).toList
     }
@@ -221,8 +225,18 @@ package object json {
       def read(json: Json): Map[String, V] = castOrThrow(json).mapValues(implicitly[ReadCodec[V]].read(_))
     }
 
+    implicit def simpleCollectionMap[V: ReadCodec] = new ReadCodec[scala.collection.Map[String, V]] {
+      def read(json: Json): scala.collection.Map[String, V] = castOrThrow(json).mapValues(implicitly[ReadCodec[V]].read)
+    }
+
     implicit def complexMap[K: ReadCodec, V: ReadCodec] = new ReadCodec[Map[K, V]] {
       def read(json: Json): Map[K, V] = castOrThrow(json).map { case (key, value) =>
+        (implicitly[ReadCodec[K]].read(Json(key)), implicitly[ReadCodec[V]].read(value))
+      }
+    }
+
+    implicit def complexCollectionMap[K: ReadCodec, V: ReadCodec] = new ReadCodec[scala.collection.Map[K, V]] {
+      def read(json: Json): scala.collection.Map[K, V] = castOrThrow(json).map { case (key, value) =>
         (implicitly[ReadCodec[K]].read(Json(key)), implicitly[ReadCodec[V]].read(value))
       }
     }
@@ -239,7 +253,7 @@ package object json {
       }
     }
 
-    implicit def deriveHNil: ReadCodec[HNil] =
+    /*implicit def deriveHNil: ReadCodec[HNil] =
       new ReadCodec[HNil] {
         // This will silently accept extra fields within a JsonObject
         // To change this behavior make sure json is a JsonObject and that it is empty
@@ -286,7 +300,7 @@ package object json {
     implicit def deriveInstance[F, G]
     (implicit gen: LabelledGeneric.Aux[F, G], sg: Lazy[ReadCodec[G]]): ReadCodec[F] = new ReadCodec[F] {
         def read(json: Json): F = gen.from(sg.value.read(json))
-      }
+      }*/
   }
 
   @implicitNotFound(msg = "Cannot find WriteCodec for ${T}")
@@ -313,12 +327,15 @@ package object json {
     implicit def simpleMap[V: WriteCodec] = new WriteCodec[scala.collection.Map[String, V]] {
       def write(obj: scala.collection.Map[String, V]): JsonObject = obj.mapValues(toJson(_)).toMap
     }
+
     implicit def simpleImmutableMap[V: WriteCodec] = new WriteCodec[Map[String, V]] {
       def write(obj: Map[String, V]): JsonObject = obj.mapValues(toJson(_)).toMap
     }
+
     implicit val jsonObject = new WriteCodec[JsonObject] {
       def write(obj: JsonObject): JsonObject = obj
     }
+
     implicit def complexMap[K: WriteCodec, V: WriteCodec] = new WriteCodec[scala.collection.Map[K,V]] {
       def write(obj: scala.collection.Map[K, V]) = obj.map { case (key, value) =>
         (Compact(implicitly[WriteCodec[K]].write(key)), implicitly[WriteCodec[V]].write(value))
@@ -327,6 +344,15 @@ package object json {
     implicit def iterable[V: WriteCodec] = new WriteCodec[Iterable[V]] {
       def write(obj: Iterable[V]): JsonArray = obj.map(toJson(_)).toSeq
     }
+
+    implicit def set[V: WriteCodec] = new WriteCodec[Set[V]] {
+      def write(obj: Set[V]): JsonArray = obj.map(toJson(_)).toSeq
+    }
+
+    implicit def setCollection[V: WriteCodec] = new WriteCodec[scala.collection.Set[V]] {
+      def write(obj: scala.collection.Set[V]): JsonArray = obj.map(toJson(_)).toSeq
+    }
+
     implicit def seq[V: WriteCodec] = new WriteCodec[Seq[V]] {
       def write(obj: Seq[V]): JsonArray = obj.map(toJson(_))
     }
@@ -343,7 +369,7 @@ package object json {
       def write(obj: Array[V]): Json = obj.map(toJson(_)).toSeq
     }
 
-        implicit val byteBuffer = new WriteCodec[ByteBuffer] {
+    implicit val byteBuffer = new WriteCodec[ByteBuffer] {
       def write(obj: ByteBuffer): String = obj.array().slice(obj.position(),obj.limit()).map(_.toChar).mkString
     }
 

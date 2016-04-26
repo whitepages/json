@@ -2,13 +2,13 @@ name := "persist-json"
 
 organization := "com.persist"
 
-version := "1.1.3"
+version := "1.2.0-WP"
 
 scalaVersion := "2.11.7"
 
 scalacOptions ++= Seq("-deprecation", "-unchecked")
 
-viewSettings
+//viewSettings
 
 libraryDependencies ++= Seq(
         "org.scala-lang" % "scala-reflect" % scalaVersion.value,
