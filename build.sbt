@@ -12,9 +12,9 @@ scalacOptions ++= Seq("-deprecation", "-unchecked")
 
 libraryDependencies ++= Seq(
         "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-        "com.chuusai" %% "shapeless" % "2.2.5",
-        "org.scalatest" %% "scalatest" % "2.2.4" % "test",
-        "org.specs2" %% "specs2-core" % "3.6.6" % "test",
+        "com.chuusai" %% "shapeless" % "2.3.0",
+        "org.scalatest" %% "scalatest" % "2.2.6" % "test",
+        "org.specs2" %% "specs2-core" % "3.7.2" % "test",
         "junit" % "junit" % "4.12" % "test"
 )
 
@@ -25,6 +25,8 @@ publishTo <<= version { v: String =>
   else
     Some("releases" at nexus + "service/local/staging/deploy/maven2")
 }
+
+useGpg := true
 
 publishMavenStyle := true
 
